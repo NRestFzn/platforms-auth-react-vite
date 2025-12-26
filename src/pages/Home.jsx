@@ -1,92 +1,68 @@
-import React from "react";
-import { useState, useEffect } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import axios from "axios";
-import "../styles/home.css";
-import { BaseUrl } from "../constants/BaseUrl";
-import getGoogleOAuthURL from "../helpers/getGoogleUrl";
-import getFacebookOAuthURL from "../helpers/getFacebookUrl";
+import React, {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 
 const Home = () => {
-  const tokenpublic = localStorage.getItem("tokenpublic");
   const navigate = useNavigate();
-  const [user, setUser] = useState({});
-  const [myLinkedAccount, setMyLinkedAccount] = useState([]);
-  const getUserbyToken = async () => {
-    const data = await axios.get(`${BaseUrl.BASE_API}user/me`, {
-      headers: { tokenpublic },
-    });
-    setUser(data.data.data)
-  };
-  const getMyLinkedAccount = async () => {
-    const { data } = await axios.get(`${BaseUrl.BASE_API}my-linked/accounts`, {
-      headers: { tokenpublic },
-    });
-   setMyLinkedAccount(data.data)
-  };
+  const [user, setUser] = useState(null);
+
   useEffect(() => {
-    if (!tokenpublic) {
-      navigate("/login");
+    const isLogin = localStorage.getItem('isLogin');
+    const userDataString = localStorage.getItem('userData');
+
+    if (!isLogin || isLogin !== 'true') {
+      navigate('/login');
+      return;
     }
-    getUserbyToken();
-    getMyLinkedAccount();
-  }, []);
+
+    if (userDataString) {
+      try {
+        const parsedUser = JSON.parse(userDataString);
+        setUser(parsedUser);
+      } catch (error) {
+        localStorage.clear();
+        navigate('/login');
+      }
+    }
+  }, [navigate]);
+
+  if (!user) {
+    return null;
+  }
 
   return (
-    <div className="home">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      <div className="max-w-sm w-full bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+        <div className="h-24 bg-linear-to-r from-(--color-primary) to-(--color-secondary)"></div>
 
-      <div className="card">
-        <div className="mainProfile">
-          <div className="photo">
+        <div className="px-6 pb-6 relative">
+          <div className="flex justify-center -mt-12">
             <img
-              src={
-                user.image
-                  ? user.image
-                  : "https://static.vecteezy.com/system/resources/previews/005/337/799/original/icon-image-not-found-free-vector.jpg"
-              }
+              src={user.picture || 'https://via.placeholder.com/150'}
+              alt={user.name}
+              className="w-24 h-24 rounded-full border-4 border-white object-cover bg-white shadow-sm"
             />
           </div>
-          <div className="profile">
-            <h3>Username : {user.username ? user.username : "no username"}</h3>
-            <h3>Email : {user.email}</h3>
-            <h3>Full Name : {user.fullname}</h3>
+
+          <div className="text-center mt-4">
+            <h2 className="text-(length:--fs-h3) font-bold text-gray-800 leading-tight">
+              {user.name}
+            </h2>
+            <p className="text-(length:--fs-p) text-gray-500 mt-1">
+              {user.email}
+            </p>
           </div>
-        </div>
-        <a href={getGoogleOAuthURL(BaseUrl.SYNC_REDIRECT)}>
-          sambungkan dengan google
-        </a>
-        <br />
-        <a href={getFacebookOAuthURL(BaseUrl.FACEBOOK_SYNC_REDIRECT)}>
-          sambungkan dengan facebook
-        </a>
-        <div className="connected">
-          {myLinkedAccount.length === 0 ? (
-            <div></div>
-          ) : (
-            <>
-              <div>
-                <h1>Akun yang terhubung</h1>
-                <div className="cardContainer">
-                  {myLinkedAccount.map(e => {
-                    return (
-                      <div className="smallCard" key={e.id}>
-                        <h3>{e.type}</h3>
-                        <div className="mainInfo">
-                          <div className="imgCard">
-                            <img src={e.image} />
-                          </div>
-                          <div className="bitInfo">
-                            <h3>{e.fullname}</h3>
-                            <h3>{e.email}</h3>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </>
-          )}
+
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={() => {
+                localStorage.clear();
+                navigate('/login');
+              }}
+              className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white text-(length:--fs-p) font-medium rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </div>
     </div>
