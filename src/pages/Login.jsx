@@ -27,18 +27,14 @@ const Login = () => {
     switch (platform) {
       case PlatFormType.google:
         window.location.href = googleOAuthUrl(
-          `${import.meta.env.VITE_BASE_APP_URL}${
-            import.meta.env.VITE_GOOGLE_SYNC_REDIRECT
-          }`
+          `${import.meta.env.VITE_BASE_APP_URL}/auth/google/sync`
         );
         message.loading(`Redirecting to ${platform}...`);
         break;
 
       case PlatFormType.facebook:
         window.location.href = facebookOAuthURL(
-          `${import.meta.env.VITE_BASE_APP_URL}${
-            import.meta.env.VITE_FACEBOOK_SYNC_REDIRECT
-          }`
+          `${import.meta.env.VITE_BASE_APP_URL}/auth/facebook/sync`
         );
         message.loading(`Redirecting to ${platform}...`);
 
