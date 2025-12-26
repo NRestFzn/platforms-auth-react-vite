@@ -17,12 +17,6 @@
    cp .env.example .env
    ```
 
-   Then configure database settings in the `.env` file.
-
-   ```
-
-   ```
-
 3. **Install dependencies**
 
    ```bash
